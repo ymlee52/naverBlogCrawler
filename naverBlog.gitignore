@@ -1,0 +1,43 @@
+# Compiled Go binaries and packages
+*.exe
+*.dll
+*.so
+*.dylib
+*.rpm
+*.deb
+*.apk
+*.bin
+*.out
+*.a
+*.gcno
+*.gcov
+*.prof
+*.ipch
+
+# Test binary, generated with 'go test -c'
+*.test
+
+# Mac OS X
+.DS_Store
+
+# IDE and Editor files
+.idea/ # GoLand/IntelliJ IDEA
+.vscode/ # VS Code
+*.sublime-project
+*.sublime-workspace
+.project
+.classpath
+.settings/
+
+# Environment variables file
+.env
+
+# Output directories for crawled data
+output_blog/
+output_blog/ai_ready/
+
+# Logs
+*.log
+
+# Dependency directories (if not using Go Modules)
+# vendor/ 
