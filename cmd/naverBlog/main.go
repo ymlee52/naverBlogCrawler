@@ -3,8 +3,9 @@ package main
 import (
 	"fmt"
 	"log"
+	"naverCrawler/internal/crawling"
 	"os"
-	"re_naverBlogCrawler/internal/crawling"
+	"strconv"
 
 	"github.com/joho/godotenv"
 )
@@ -26,6 +27,13 @@ func main() {
 	}
 
 	maxPages := 10
+	if maxPagesStr := os.Getenv("MAX_PAGES"); maxPagesStr != "" {
+		if v, err := strconv.Atoi(maxPagesStr); err == nil {
+			maxPages = v
+		} else {
+			log.Printf("MAX_PAGES 환경변수 파싱 실패: %v, 기본값 10 사용", err)
+		}
+	}
 
 	log.Printf("🎯 대상 블로그: %s", blogID)
 	log.Printf("📄 크롤링 페이지 수: %d", maxPages)

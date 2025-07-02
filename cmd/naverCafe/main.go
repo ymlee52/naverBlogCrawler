@@ -7,7 +7,7 @@ import (
 	"os"
 	"strings"
 
-	"re_naverBlogCrawler/internal/crawling"
+	"naverCrawler/internal/crawling"
 
 	"github.com/joho/godotenv"
 )
@@ -37,27 +37,17 @@ func main() {
 	if cookie == "" {
 		log.Fatal("NAVER_COOKIE 환경 변수가 설정되지 않았습니다.")
 	}
-
-	// 검색 키워드 가져오기
-	keyword := os.Getenv("NAVER_SEARCH_KEYWORD")
-	if keyword == "" {
-		log.Fatal("NAVER_SEARCH_KEYWORD 환경 변수가 설정되지 않았습니다.")
-	}
+	boardID := os.Getenv("NAVER_BOARD_ID") // 크롤링할 게시판 ID
 
 	// 최대 페이지 수 설정 (0은 무제한)
 	maxPages := 10
 	// pageSize 설정 (기본값: 10)
 	pageSize := 15
 
-	fmt.Printf("🔍 검색어 '%s'로 네이버 카페 크롤링 시작...\n", keyword)
-	posts, err := crawling.CrawlSearchResults(cafeId, keyword, cookie, maxPages, pageSize)
+	fmt.Println("🚀 네이버 카페 크롤링 시작...")
+	posts, err := crawling.CrawlBoard(cafeId, boardID, cookie, maxPages, pageSize)
 	if err != nil {
 		log.Fatal("❌ 크롤링 중 오류 발생:", err)
-	}
-
-	if len(posts) == 0 {
-		fmt.Printf("⚠️ 검색어 '%s'에 대한 결과가 없습니다.\n", keyword)
-		return
 	}
 
 	fmt.Printf("✅ 크롤링 완료! 총 %d개 게시글 수집\n", len(posts))

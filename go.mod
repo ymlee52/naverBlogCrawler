@@ -1,4 +1,4 @@
-module re_naverBlogCrawler
+module naverCrawler
 
 go 1.24.3
 
