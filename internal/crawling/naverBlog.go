@@ -6,11 +6,14 @@ import (
 	"io"
 	"log"
 	"naverCrawler/internal/utils"
+	"net/http"
 	"net/url"
 	"os"
 	"path/filepath"
 	"strings"
 	"time"
+
+	"github.com/PuerkitoBio/goquery"
 )
 
 // BlogPost represents a blog post with only title, date and URL.
@@ -165,4 +168,56 @@ func printResults(posts []BlogPost) {
 		fmt.Printf("   📅 %s | 🔗 %s\n", post.WriteDate, post.OriginalURL)
 		fmt.Println()
 	}
+}
+
+// URL을 받아 해당 네이버 블로그 게시글의 본문을 크롤링하는 함수
+func CrawlBlogPostByURL(url string) (string, error) {
+	resp, err := http.Get(url)
+	if err != nil {
+		return "", fmt.Errorf("HTTP 요청 실패: %v", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return "", fmt.Errorf("HTTP 상태 코드 오류: %d", resp.StatusCode)
+	}
+
+	doc, err := goquery.NewDocumentFromReader(resp.Body)
+	if err != nil {
+		return "", fmt.Errorf("goquery 파싱 실패: %v", err)
+	}
+
+	iframeSrc, exists := doc.Find("iframe#mainFrame").Attr("src")
+	if !exists {
+		return "", fmt.Errorf("본문 iframe(mainFrame) src를 찾을 수 없음")
+	}
+
+	if strings.HasPrefix(iframeSrc, "/") {
+		iframeSrc = "https://blog.naver.com" + iframeSrc
+	}
+
+	resp2, err := http.Get(iframeSrc)
+	if err != nil {
+		return "", fmt.Errorf("본문 iframe 요청 실패: %v", err)
+	}
+	defer resp2.Body.Close()
+
+	if resp2.StatusCode != http.StatusOK {
+		return "", fmt.Errorf("본문 iframe HTTP 상태 코드 오류: %d", resp2.StatusCode)
+	}
+
+	doc2, err := goquery.NewDocumentFromReader(resp2.Body)
+	if err != nil {
+		return "", fmt.Errorf("본문 iframe goquery 파싱 실패: %v", err)
+	}
+
+	content := doc2.Find("div.se-main-container").Text()
+	if strings.TrimSpace(content) == "" {
+		content = doc2.Find("div#postViewArea").Text()
+	}
+	if strings.TrimSpace(content) == "" {
+		return "", fmt.Errorf("본문을 찾을 수 없음")
+	}
+
+	return strings.TrimSpace(content), nil
 }
